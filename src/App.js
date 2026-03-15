@@ -1,9 +1,6 @@
 async function fetchCard(word, pinyin, pos, level) {
   const levelLabel = level === 7 ? "7-9 (Advanced Mastery)" : level;
   const posLabel = posEn(pos);
-  
-  // For now, use placeholder data (no API key needed)
-  // If you add an API key later, it will use real data
   return {
     meaning: "to love; to like; affection",
     sentence: "我喜欢学习中文。",
