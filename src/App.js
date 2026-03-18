@@ -503,7 +503,7 @@ const VOCAB_RAW = {"1":[
   ["足球","zúqiú","noun","football, soccer","我喜欢踢足球。","","","踢 + Ball Sport"]
 ],
 "3": [
-  ["矮","ǎi","adjective","short (height)","我弟弟很矮，他比我小三岁。","......","......","Subject + 很 + Adjective"],
+  ["矮","ǎi","adjective","short (height)","我弟弟很矮，他比我小三米。","......","......","Subject + 很 + Adjective"],
   ["爱人","àirén","noun","spouse, husband/wife","这是我的爱人，我们结婚五年了。","......","......","Possession: 的 + Noun"],
   ["安静","ānjìng","adjective","quiet, peaceful","图书馆很安静，请大家小声说话。","......","......","Place + 很 + Adjective"],
   ["安全","ānquán","adjective","safe, secure","晚上一个人走路不安全。","......","......","Subject + 不 + Adjective"],
