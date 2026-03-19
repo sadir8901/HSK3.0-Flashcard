@@ -2120,7 +2120,7 @@ function CardFront({ card, cfg, cardInfo, loading, error }) {
         <div style={{fontSize:12,color:"#ff6b6b",textAlign:"center",padding:"0 20px",opacity:0.85,lineHeight:1.6}}>{error}</div>
       ) : null}
 
-      <div style={{
+ <div style={{
   position:"absolute", bottom:22,
   display:"flex", alignItems:"center", gap:6,
   fontSize:10, letterSpacing:3, textTransform:"uppercase",
@@ -2459,10 +2459,8 @@ const handleTouchEnd = () => {
         }}/>
       </div>
 
-     <div style={{
-  marginTop:12,fontSize:10,color:"rgba(255,255,255,0.18)",
-  letterSpacing:2,textAlign:"center",zIndex:1,position:"relative",
-}}>
+     <div style={{marginTop:12,fontSize:10,color:"rgba(255,255,255,0.18)",
+  letterSpacing:2,textAlign:"center"}}>
   <div style={{marginBottom:8}}>Created by sadir</div>
   </div>
       <style>{`
