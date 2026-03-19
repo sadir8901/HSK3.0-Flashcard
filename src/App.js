@@ -2121,10 +2121,12 @@ function CardFront({ card, cfg, cardInfo, loading, error }) {
       ) : null}
 
       <div style={{
-        position:"absolute",bottom:0,right:0,width:100,height:100,
-        background:`radial-gradient(circle at 100% 100%, ${hueA(cfg.hue,60,40,0.12)}, transparent 70%)`,
-        borderRadius:"24px 0",pointerEvents:"none",
-      }}/>
+  position:"absolute", bottom:22,
+  display:"flex", alignItems:"center", gap:6,
+  fontSize:10, letterSpacing:3, textTransform:"uppercase",
+  color:"rgba(255,255,255,0.18)",
+}}>
+  <span style={{fontSize:15, opacity:0.6}}>↺</span> tap to flip
     </div>
   );
 }
@@ -2462,9 +2464,7 @@ const handleTouchEnd = () => {
   letterSpacing:2,textAlign:"center",zIndex:1,position:"relative",
 }}>
   <div style={{marginBottom:8}}>Created by sadir</div>
-  <div>← → Navigate &nbsp;·&nbsp; Space / Enter = Flip</div>
-</div>
-
+  
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=Noto+Sans+SC:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&display=swap');
         @keyframes pulse { 0%,100%{opacity:0.35} 50%{opacity:0.7} }
