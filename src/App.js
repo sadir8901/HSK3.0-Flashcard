@@ -2464,7 +2464,7 @@ const handleTouchEnd = () => {
   letterSpacing:2,textAlign:"center",zIndex:1,position:"relative",
 }}>
   <div style={{marginBottom:8}}>Created by sadir</div>
-  
+  </div>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=Noto+Sans+SC:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&display=swap');
         @keyframes pulse { 0%,100%{opacity:0.35} 50%{opacity:0.7} }
