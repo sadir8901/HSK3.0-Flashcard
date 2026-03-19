@@ -2121,15 +2121,6 @@ function CardFront({ card, cfg, cardInfo, loading, error }) {
       ) : null}
 
       <div style={{
-        position:"absolute",bottom:22,
-        display:"flex",alignItems:"center",gap:6,
-        fontSize:10,letterSpacing:3,textTransform:"uppercase",
-        color:"rgba(255,255,255,0.18)",
-      }}>
-        <span style={{fontSize:15,opacity:0.6}}>↺</span> tap to flip
-      </div>
-
-      <div style={{
         position:"absolute",bottom:0,right:0,width:100,height:100,
         background:`radial-gradient(circle at 100% 100%, ${hueA(cfg.hue,60,40,0.12)}, transparent 70%)`,
         borderRadius:"24px 0",pointerEvents:"none",
@@ -2240,6 +2231,8 @@ export default function HSKApp() {
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState(null);
   const cache = useRef({});
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
 
   const cfg = LEVELS[level];
   const raw = VOCAB_RAW[String(level)] || [];
@@ -2254,15 +2247,30 @@ export default function HSKApp() {
   const card = ordered[idx];
   const total = ordered.length;
 
-  useEffect(() => {
-    if (!card) return;
-    const key = `${card[0]}|${level}`;
-    if (cache.current[key]) { setCardInfo(cache.current[key]); setError(null); return; }
-    setCardInfo(null); setError(null); setLoading(true);
-    fetchCard(card[0], card[1], card[2], level)
-      .then(d => { cache.current[key] = d; setCardInfo(d); setLoading(false); })
-      .catch(e => { console.error(e); setError("Could not load — check connection and try again."); setLoading(false); });
-  }, [card?.[0], level]);
+ useEffect(() => {
+  if (!card) return;
+  const key = `${card[0]}|${level}`;
+  if (cache.current[key]) {
+    setCardInfo(cache.current[key]);
+    setError(null);
+    return;
+  }
+  setCardInfo(null);
+  setError(null);
+  setLoading(true);
+  fetchCard(card[0], card[1], card[2], level)
+    .then(d => {
+      cache.current[key] = d;
+      setCardInfo(d);
+      setLoading(false);
+    })
+    .catch(e => {
+      console.error(e);
+      setError("Could not load — check connection and try again.");
+      setLoading(false);
+    });
+}, [card?.[0], level]);
+    
 
   const go = useCallback((dir) => {
     setFlipped(false);
@@ -2280,16 +2288,44 @@ export default function HSKApp() {
 
   const changeLevel = l => { setLevel(l); setIdx(0); setFlipped(false); setSearch(""); };
 
-  const toggleShuffle = () => {
-    if (!shuffleOn) {
-      const arr = filtered.map((_,i)=>i);
-      for (let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}
-      setOrderMap(m=>({...m,[level]:arr}));
-    } else {
-      setOrderMap(m=>({...m,[level]:null}));
+ const toggleShuffle = () => {
+  if (!shuffleOn) {
+    const arr = filtered.map((_, i) => i);
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
     }
-    setShuffleOn(!shuffleOn); setIdx(0); setFlipped(false);
-  };
+    setOrderMap(m => ({ ...m, [level]: arr }));
+  } else {
+    setOrderMap(m => ({ ...m, [level]: null }));
+  }
+  setShuffleOn(!shuffleOn);
+  setIdx(0);
+  setFlipped(false);
+};
+
+const handleTouchStart = (e) => {
+  setTouchEnd(null);
+  setTouchStart(e.touches[0].clientX);
+};
+
+const handleTouchMove = (e) => {
+  e.preventDefault();
+  setTouchEnd(e.touches[0].clientX);
+};
+
+const handleTouchEnd = () => {
+  if (!touchStart || !touchEnd) return;
+  const distance = touchStart - touchEnd;
+  const minSwipeDistance = 50;
+  if (distance > minSwipeDistance) {
+    go("n");
+  } else if (distance < -minSwipeDistance) {
+    go("p");
+  }
+  setTouchStart(null);
+  setTouchEnd(null);
+};
 
   const pct = total>0 ? ((idx+1)/total)*100 : 0;
 
@@ -2364,13 +2400,16 @@ export default function HSKApp() {
       </div>
 
       {card ? (
-        <div
-          onClick={()=>setFlipped(f=>!f)}
-          style={{
-            width:"100%",maxWidth:430,minHeight:500,
-            perspective:1500,cursor:"pointer",
-            position:"relative",zIndex:1,userSelect:"none",
-          }}
+      <div
+  onClick={() => setFlipped(f => !f)}
+  onTouchStart={handleTouchStart}
+  onTouchMove={handleTouchMove}
+  onTouchEnd={handleTouchEnd}
+  style={{
+    width:"100%", maxWidth:430, minHeight:500,
+    perspective:1500, cursor:"pointer",
+    position:"relative", zIndex:1, userSelect:"none",
+  }}
         >
           <div style={{
             width:"100%",minHeight:500,position:"relative",
