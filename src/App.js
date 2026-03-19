@@ -2027,10 +2027,8 @@ function hue(h,s=70,l=55){return `hsl(${h},${s}%,${l}%)`}
 function hueA(h,s=70,l=55,a=1){return `hsla(${h},${s}%,${l}%,${a})`}
 
 async function fetchCard(word, pinyin, pos, level) {
-  // Get the word data from VOCAB_RAW
   const levelData = VOCAB_RAW[String(level)] || [];
   const wordData = levelData.find(item => item[0] === word && item[1] === pinyin);
-  
   if (wordData && wordData.length >= 8) {
     return {
       meaning: wordData[3],
@@ -2040,8 +2038,6 @@ async function fetchCard(word, pinyin, pos, level) {
       grammar: wordData[7]
     };
   }
-  
-  // Fallback if data not found
   return {
     meaning: "Meaning not available",
     sentence: "例句不可用。",
@@ -2120,13 +2116,20 @@ function CardFront({ card, cfg, cardInfo, loading, error }) {
         <div style={{fontSize:12,color:"#ff6b6b",textAlign:"center",padding:"0 20px",opacity:0.85,lineHeight:1.6}}>{error}</div>
       ) : null}
 
- <div style={{
-  position:"absolute", bottom:22,
-  display:"flex", alignItems:"center", gap:6,
-  fontSize:10, letterSpacing:3, textTransform:"uppercase",
-  color:"rgba(255,255,255,0.18)",
-}}>
-  <span style={{fontSize:15, opacity:0.6}}>↺</span> tap to flip
+      <div style={{
+        position:"absolute", bottom:22,
+        display:"flex", alignItems:"center", gap:6,
+        fontSize:10, letterSpacing:3, textTransform:"uppercase",
+        color:"rgba(255,255,255,0.18)",
+      }}>
+        <span style={{fontSize:15, opacity:0.6}}>↺</span> tap to flip
+      </div>
+
+      <div style={{
+        position:"absolute", bottom:0, right:0, width:100, height:100,
+        background:`radial-gradient(circle at 100% 100%, ${hueA(cfg.hue,60,40,0.12)}, transparent 70%)`,
+        borderRadius:"24px 0", pointerEvents:"none",
+      }}/>
     </div>
   );
 }
@@ -2143,7 +2146,6 @@ function CardBack({ card, cfg, cardInfo, loading }) {
       border:`1px solid ${hueA(cfg.hue,50,45,0.2)}`,
       boxShadow:`0 32px 80px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.06)`,
     }}>
-
       <div style={{width:"100%",textAlign:"center",marginBottom:22}}>
         <div style={{
           fontSize:11,letterSpacing:4,textTransform:"uppercase",
@@ -2174,7 +2176,7 @@ function CardBack({ card, cfg, cardInfo, loading }) {
             borderLeft:`2px solid ${hueA(cfg.hue,65,55,0.7)}`,
             paddingLeft:14,
             background:`linear-gradient(to right, ${hueA(cfg.hue,40,30,0.15)}, transparent)`,
-            borderRadius:"0 10px 10px 0",padding:"12px 14px",
+            borderRadius:"0 10px 10px 0", padding:"12px 14px",
           }}>
             <div style={{fontSize:14,color:"rgba(255,255,255,0.8)",lineHeight:1.8}}>{cardInfo.grammar}</div>
           </div>
@@ -2222,16 +2224,16 @@ const faceBase = {
 };
 
 export default function HSKApp() {
-  const [level, setLevel]   = useState(1);
-  const [idx, setIdx]       = useState(0);
+  const [level, setLevel] = useState(1);
+  const [idx, setIdx] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [shuffleOn, setShuffleOn] = useState(false);
-  const [orderMap, setOrderMap]   = useState({});
+  const [orderMap, setOrderMap] = useState({});
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [cardInfo, setCardInfo] = useState(null);
-  const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const cache = useRef({});
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
@@ -2249,30 +2251,29 @@ export default function HSKApp() {
   const card = ordered[idx];
   const total = ordered.length;
 
- useEffect(() => {
-  if (!card) return;
-  const key = `${card[0]}|${level}`;
-  if (cache.current[key]) {
-    setCardInfo(cache.current[key]);
+  useEffect(() => {
+    if (!card) return;
+    const key = `${card[0]}|${level}`;
+    if (cache.current[key]) {
+      setCardInfo(cache.current[key]);
+      setError(null);
+      return;
+    }
+    setCardInfo(null);
     setError(null);
-    return;
-  }
-  setCardInfo(null);
-  setError(null);
-  setLoading(true);
-  fetchCard(card[0], card[1], card[2], level)
-    .then(d => {
-      cache.current[key] = d;
-      setCardInfo(d);
-      setLoading(false);
-    })
-    .catch(e => {
-      console.error(e);
-      setError("Could not load — check connection and try again.");
-      setLoading(false);
-    });
-}, [card?.[0], level]);
-    
+    setLoading(true);
+    fetchCard(card[0], card[1], card[2], level)
+      .then(d => {
+        cache.current[key] = d;
+        setCardInfo(d);
+        setLoading(false);
+      })
+      .catch(e => {
+        console.error(e);
+        setError("Could not load — check connection and try again.");
+        setLoading(false);
+      });
+  }, [card?.[0], level]);
 
   const go = useCallback((dir) => {
     setFlipped(false);
@@ -2290,87 +2291,87 @@ export default function HSKApp() {
 
   const changeLevel = l => { setLevel(l); setIdx(0); setFlipped(false); setSearch(""); };
 
- const toggleShuffle = () => {
-  if (!shuffleOn) {
-    const arr = filtered.map((_, i) => i);
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
+  const toggleShuffle = () => {
+    if (!shuffleOn) {
+      const arr = filtered.map((_, i) => i);
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      setOrderMap(m => ({ ...m, [level]: arr }));
+    } else {
+      setOrderMap(m => ({ ...m, [level]: null }));
     }
-    setOrderMap(m => ({ ...m, [level]: arr }));
-  } else {
-    setOrderMap(m => ({ ...m, [level]: null }));
-  }
-  setShuffleOn(!shuffleOn);
-  setIdx(0);
-  setFlipped(false);
-};
+    setShuffleOn(!shuffleOn);
+    setIdx(0);
+    setFlipped(false);
+  };
 
-const handleTouchStart = (e) => {
-  setTouchEnd(null);
-  setTouchStart(e.touches[0].clientX);
-};
+  const handleTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.touches[0].clientX);
+  };
 
-const handleTouchMove = (e) => {
-  e.preventDefault();
-  setTouchEnd(e.touches[0].clientX);
-};
+  const handleTouchMove = (e) => {
+    e.preventDefault();
+    setTouchEnd(e.touches[0].clientX);
+  };
 
-const handleTouchEnd = () => {
-  if (!touchStart || !touchEnd) return;
-  const distance = touchStart - touchEnd;
-  const minSwipeDistance = 50;
-  if (distance > minSwipeDistance) {
-    go("n");
-  } else if (distance < -minSwipeDistance) {
-    go("p");
-  }
-  setTouchStart(null);
-  setTouchEnd(null);
-};
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const minSwipeDistance = 50;
+    if (distance > minSwipeDistance) {
+      go("n");
+    } else if (distance < -minSwipeDistance) {
+      go("p");
+    }
+    setTouchStart(null);
+    setTouchEnd(null);
+  };
 
   const pct = total>0 ? ((idx+1)/total)*100 : 0;
 
   return (
     <div style={{
-      minHeight:"100vh",background:"#080b10",
-      display:"flex",flexDirection:"column",alignItems:"center",
-      padding:"28px 16px 60px",fontFamily:"'Cormorant Garamond',Georgia,serif",
-      overflow:"hidden",position:"relative",
+      minHeight:"100vh", background:"#080b10",
+      display:"flex", flexDirection:"column", alignItems:"center",
+      padding:"28px 16px 60px", fontFamily:"'Cormorant Garamond',Georgia,serif",
+      overflow:"hidden", position:"relative",
     }}>
       <div style={{
-        position:"fixed",width:700,height:700,borderRadius:"50%",
+        position:"fixed", width:700, height:700, borderRadius:"50%",
         background:`radial-gradient(circle, ${hueA(cfg.hue,60,30,0.12)} 0%, transparent 70%)`,
-        top:"5%",left:"50%",transform:"translateX(-50%)",
-        pointerEvents:"none",transition:"background 0.8s ease",zIndex:0,
+        top:"5%", left:"50%", transform:"translateX(-50%)",
+        pointerEvents:"none", transition:"background 0.8s ease", zIndex:0,
       }}/>
 
-      <div style={{textAlign:"center",marginBottom:24,zIndex:1,position:"relative"}}>
+      <div style={{textAlign:"center", marginBottom:24, zIndex:1, position:"relative"}}>
         <div style={{
-          fontFamily:"'Noto Serif SC',serif",fontSize:10,
-          letterSpacing:7,color:hue(cfg.hue,60,65),
-          textTransform:"uppercase",opacity:0.7,marginBottom:5,
+          fontFamily:"'Noto Serif SC',serif", fontSize:10,
+          letterSpacing:7, color:hue(cfg.hue,60,65),
+          textTransform:"uppercase", opacity:0.7, marginBottom:5,
         }}>汉字学习卡片</div>
-        <div style={{fontSize:26,fontWeight:300,color:"rgba(255,255,255,0.92)",letterSpacing:2}}>
+        <div style={{fontSize:26, fontWeight:300, color:"rgba(255,255,255,0.92)", letterSpacing:2}}>
           HSK Flashcards
         </div>
-        <div style={{fontSize:12,color:"rgba(255,255,255,0.28)",marginTop:3,letterSpacing:1}}>
+        <div style={{fontSize:12, color:"rgba(255,255,255,0.28)", marginTop:3, letterSpacing:1}}>
           {cfg.desc} · {total.toLocaleString()} words
         </div>
       </div>
 
       <div style={{
-        display:"flex",flexWrap:"wrap",justifyContent:"center",
-        gap:4,marginBottom:20,zIndex:1,position:"relative",
-        background:"rgba(255,255,255,0.03)",padding:5,borderRadius:50,
+        display:"flex", flexWrap:"wrap", justifyContent:"center",
+        gap:4, marginBottom:20, zIndex:1, position:"relative",
+        background:"rgba(255,255,255,0.03)", padding:5, borderRadius:50,
         border:"1px solid rgba(255,255,255,0.06)",
       }}>
         {Object.entries(LEVELS).map(([l,c])=>{
           const active = level===+l;
           return (
             <button key={l} onClick={()=>changeLevel(+l)} style={{
-              padding:"6px 14px",borderRadius:30,border:"none",cursor:"pointer",
-              fontFamily:"'Cormorant Garamond',serif",fontSize:13,letterSpacing:0.5,
+              padding:"6px 14px", borderRadius:30, border:"none", cursor:"pointer",
+              fontFamily:"'Cormorant Garamond',serif", fontSize:13, letterSpacing:0.5,
               transition:"all 0.3s ease",
               background: active ? hue(+l===7?c.hue:c.hue,65,48) : "transparent",
               color: active ? "#fff" : "rgba(255,255,255,0.38)",
@@ -2381,17 +2382,17 @@ const handleTouchEnd = () => {
         })}
       </div>
 
-      <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:20,zIndex:1,position:"relative"}}>
+      <div style={{display:"flex", gap:8, alignItems:"center", marginBottom:20, zIndex:1, position:"relative"}}>
         {showSearch ? (
           <input
             autoFocus value={search}
-            onChange={e=>{setSearch(e.target.value);setIdx(0);setFlipped(false);}}
+            onChange={e=>{setSearch(e.target.value); setIdx(0); setFlipped(false);}}
             onBlur={()=>{ if(!search) setShowSearch(false); }}
             placeholder="Search character or pīnyīn…"
             style={{
-              background:"rgba(255,255,255,0.07)",border:`1px solid ${hueA(cfg.hue,55,50,0.5)}`,
-              borderRadius:20,padding:"6px 16px",color:"#fff",fontSize:14,
-              fontFamily:"'Cormorant Garamond',serif",outline:"none",width:220,
+              background:"rgba(255,255,255,0.07)", border:`1px solid ${hueA(cfg.hue,55,50,0.5)}`,
+              borderRadius:20, padding:"6px 16px", color:"#fff", fontSize:14,
+              fontFamily:"'Cormorant Garamond',serif", outline:"none", width:220,
               transition:"border 0.2s",
             }}/>
         ) : (
@@ -2402,44 +2403,44 @@ const handleTouchEnd = () => {
       </div>
 
       {card ? (
-      <div
-  onClick={() => setFlipped(f => !f)}
-  onTouchStart={handleTouchStart}
-  onTouchMove={handleTouchMove}
-  onTouchEnd={handleTouchEnd}
-  style={{
-    width:"100%", maxWidth:430, minHeight:500,
-    perspective:1500, cursor:"pointer",
-    position:"relative", zIndex:1, userSelect:"none",
-  }}
+        <div
+          onClick={() => setFlipped(f => !f)}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          style={{
+            width:"100%", maxWidth:430, minHeight:500,
+            perspective:1500, cursor:"pointer",
+            position:"relative", zIndex:1, userSelect:"none",
+          }}
         >
           <div style={{
-            width:"100%",minHeight:500,position:"relative",
+            width:"100%", minHeight:500, position:"relative",
             transformStyle:"preserve-3d",
             transition:"transform 0.75s cubic-bezier(0.3,0.1,0.2,1)",
             transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
           }}>
-            <CardFront card={{word:card[0],pinyin:card[1],pos:card[2]}} cfg={cfg} cardInfo={cardInfo} loading={loading} error={error}/>
-            <CardBack  card={{word:card[0],pinyin:card[1],pos:card[2]}} cfg={cfg} cardInfo={cardInfo} loading={loading}/>
+            <CardFront card={{word:card[0], pinyin:card[1], pos:card[2]}} cfg={cfg} cardInfo={cardInfo} loading={loading} error={error}/>
+            <CardBack  card={{word:card[0], pinyin:card[1], pos:card[2]}} cfg={cfg} cardInfo={cardInfo} loading={loading}/>
           </div>
         </div>
       ) : (
         <div style={{
-          width:"100%",maxWidth:430,height:500,
-          display:"flex",alignItems:"center",justifyContent:"center",
-          color:"rgba(255,255,255,0.3)",fontSize:15,
+          width:"100%", maxWidth:430, height:500,
+          display:"flex", alignItems:"center", justifyContent:"center",
+          color:"rgba(255,255,255,0.3)", fontSize:15,
         }}>
           No cards found{search ? ` for "${search}"` : ""}.
         </div>
       )}
 
-      <div style={{display:"flex",alignItems:"center",gap:20,marginTop:28,zIndex:1,position:"relative"}}>
+      <div style={{display:"flex", alignItems:"center", gap:20, marginTop:28, zIndex:1, position:"relative"}}>
         <NavBtn onClick={()=>go("p")} hue={cfg.hue}>←</NavBtn>
-        <div style={{textAlign:"center",minWidth:80}}>
-          <div style={{fontSize:26,fontWeight:300,color:"rgba(255,255,255,0.85)",lineHeight:1}}>
+        <div style={{textAlign:"center", minWidth:80}}>
+          <div style={{fontSize:26, fontWeight:300, color:"rgba(255,255,255,0.85)", lineHeight:1}}>
             {(idx+1).toLocaleString()}
           </div>
-          <div style={{fontSize:11,color:"rgba(255,255,255,0.28)",letterSpacing:1,marginTop:2}}>
+          <div style={{fontSize:11, color:"rgba(255,255,255,0.28)", letterSpacing:1, marginTop:2}}>
             of {total.toLocaleString()}
           </div>
         </div>
@@ -2447,28 +2448,28 @@ const handleTouchEnd = () => {
       </div>
 
       <div style={{
-        width:"100%",maxWidth:430,height:2,
-        background:"rgba(255,255,255,0.07)",borderRadius:2,
-        marginTop:14,overflow:"hidden",position:"relative",zIndex:1,
+        width:"100%", maxWidth:430, height:2,
+        background:"rgba(255,255,255,0.07)", borderRadius:2,
+        marginTop:14, overflow:"hidden", position:"relative", zIndex:1,
       }}>
         <div style={{
-          height:"100%",borderRadius:2,
+          height:"100%", borderRadius:2,
           background:`linear-gradient(to right, ${hue(cfg.hue,65,40)}, ${hue(cfg.hue,75,60)})`,
-          width:`${pct}%`,transition:"width 0.4s ease",
+          width:`${pct}%`, transition:"width 0.4s ease",
           boxShadow:`0 0 8px ${hueA(cfg.hue,70,55,0.6)}`,
         }}/>
       </div>
 
-     <div style={{marginTop:12,fontSize:10,color:"rgba(255,255,255,0.18)",
-  letterSpacing:2,textAlign:"center"}}>
-  <div style={{marginBottom:8}}>Created by sadir</div>
-  </div>
+      <div style={{marginTop:12, fontSize:10, color:"rgba(255,255,255,0.18)", letterSpacing:2, textAlign:"center"}}>
+        <div style={{marginBottom:8}}>Created by sadir</div>
+      </div>
+
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=Noto+Sans+SC:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&display=swap');
         @keyframes pulse { 0%,100%{opacity:0.35} 50%{opacity:0.7} }
-        *{box-sizing:border-box;margin:0;padding:0}
+        *{box-sizing:border-box; margin:0; padding:0}
         ::-webkit-scrollbar{width:3px}
-        ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.12);border-radius:2px}
+        ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.12); border-radius:2px}
       `}</style>
     </div>
   );
@@ -2477,8 +2478,8 @@ const handleTouchEnd = () => {
 function Btn({ children, onClick, hue: h, active }) {
   return (
     <button onClick={onClick} style={{
-      padding:"5px 14px",borderRadius:20,cursor:"pointer",
-      fontFamily:"'Cormorant Garamond',serif",fontSize:13,letterSpacing:0.5,
+      padding:"5px 14px", borderRadius:20, cursor:"pointer",
+      fontFamily:"'Cormorant Garamond',serif", fontSize:13, letterSpacing:0.5,
       transition:"all 0.2s",
       background: active ? hueA(h,55,40,0.4) : "rgba(255,255,255,0.04)",
       border: `1px solid ${active ? hueA(h,55,50,0.6) : "rgba(255,255,255,0.1)"}`,
@@ -2486,15 +2487,16 @@ function Btn({ children, onClick, hue: h, active }) {
     }}>{children}</button>
   );
 }
+
 function NavBtn({ children, onClick, hue: h }) {
   return (
     <button onClick={onClick} style={{
-      width:48,height:48,borderRadius:"50%",cursor:"pointer",
+      width:48, height:48, borderRadius:"50%", cursor:"pointer",
       background:"rgba(255,255,255,0.04)",
       border:`1px solid ${hueA(h,40,45,0.25)}`,
-      color:"rgba(255,255,255,0.65)",fontSize:18,
-      display:"flex",alignItems:"center",justifyContent:"center",
-      transition:"all 0.2s",fontFamily:"monospace",
+      color:"rgba(255,255,255,0.65)", fontSize:18,
+      display:"flex", alignItems:"center", justifyContent:"center",
+      transition:"all 0.2s", fontFamily:"monospace",
     }}>{children}</button>
   );
 }
